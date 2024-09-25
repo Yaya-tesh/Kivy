@@ -35,18 +35,12 @@ jobs:
     - name: Set up Android SDK environment
       run: |
         echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Refresh Environment
-      run: |
-        source $GITHUB_ENV
-        echo $PATH
+        echo "$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
       shell: bash
 
     - name: Accept Android SDK Licenses
       run: |
-        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
+        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses || true
       shell: bash
 
     - name: Install Android SDK components
