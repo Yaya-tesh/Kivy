@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -32,11 +32,24 @@ jobs:
         pip install buildozer
         sudo apt install -y openjdk-11-jdk
 
+    - name: Install Android SDK Command-line Tools
+      run: |
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/tools
+
+    - name: Set up Android SDK environment
+      run: |
+        echo "export ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
+      shell: bash
+
     - name: Accept Android SDK Licenses
       run: |
         yes | sdkmanager --licenses
 
-    - name: Install Android SDK and Tools
+    - name: Install Android SDK and Build Tools
       run: |
         sdkmanager "platform-tools" "platforms;android-31" "build-tools;35.0.0"
 
@@ -47,6 +60,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v3
       with:
-        name: mykivyapp-apk
+        name: kivy-app-apk
         path: bin/*.apk
-        
