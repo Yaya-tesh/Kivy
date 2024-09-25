@@ -49,3 +49,4 @@ jobs:
       with:
         name: mykivyapp-apk
         path: bin/*.apk
+        
