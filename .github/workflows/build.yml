@@ -32,9 +32,17 @@ jobs:
         pip install buildozer
         sudo apt install -y openjdk-11-jdk
 
+    - name: Accept Android SDK Licenses
+      run: |
+        yes | sdkmanager --licenses
+
+    - name: Install Android SDK and Tools
+      run: |
+        sdkmanager "platform-tools" "platforms;android-31" "build-tools;35.0.0"
+
     - name: Build APK
       run: |
-        buildozer -v android debug  # This will automatically set up the SDK and build the APK
+        buildozer -v android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v3
