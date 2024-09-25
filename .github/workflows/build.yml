@@ -1,70 +1,37 @@
-name: Build Kivy Android App
+name: Build Android App
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install buildozer cython
+      - name: Install Android SDK
+        run: |
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-    - name: Install Android SDK Command-line Tools
-      run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/tools
+      - name: Accept Android SDK Licenses
+        run: yes | sdkmanager --licenses
 
-    - name: Set up Android SDK environment
-      run: |
-        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
-      shell: bash
+      - name: Clear SDK Cache
+        run: rm -rf $HOME/android-sdk/.cache
 
-    - name: Force Accept Android SDK Licenses
-      run: |
-        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses || true
-      shell: bash
+      - name: Uninstall Build Tools
+        run: sdkmanager --uninstall "build-tools;35.0.0"
 
-    - name: Install Android SDK components (stable build tools)
-      run: |
-        $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;34.0.0"
-      shell: bash
+      - name: Install Stable Build Tools
+        run: sdkmanager "build-tools;34.0.0"
 
-    - name: Ensure AIDL is Installed (for stable build tools)
-      run: |
-        echo "Checking for AIDL in build-tools"
-        if [ ! -f "$HOME/android-sdk/build-tools/34.0.0/aidl" ]; then
-          echo "AIDL not found in build-tools 34.0.0, reinstalling..."
-          $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "build-tools;34.0.0"
-        fi
-        if [ ! -f "$HOME/android-sdk/build-tools/34.0.0/aidl" ]; then
-          echo "AIDL still not found, failing the build."
-          exit 1
-        else
-          echo "AIDL successfully found."
-        fi
-      shell: bash
-
-    - name: Build the APK
-      run: |
-        buildozer android debug
-      shell: bash
+      - name: Build APK
+        run: buildozer -v -p android debug  # Ensure this step is correctly configured
