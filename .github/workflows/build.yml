@@ -36,6 +36,7 @@ jobs:
       run: |
         echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
         echo "PATH=$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
+        source $GITHUB_ENV
       shell: bash
 
     - name: Accept Android SDK Licenses
@@ -46,6 +47,18 @@ jobs:
     - name: Install Android SDK components
       run: |
         $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+      shell: bash
+
+    - name: Ensure AIDL and build tools are installed
+      run: |
+        if [ ! -d "$HOME/android-sdk/build-tools/30.0.3" ]; then
+          echo "Build tools not found, installing..."
+          $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "build-tools;30.0.3"
+        fi
+        if [ ! -f "$HOME/android-sdk/build-tools/30.0.3/aidl" ]; then
+          echo "AIDL not found, installing..."
+          $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-30"
+        fi
       shell: bash
 
     - name: Build the APK
