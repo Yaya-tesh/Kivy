@@ -37,7 +37,6 @@ jobs:
       run: |
         echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
         echo "PATH=$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
-        echo "PATH=$HOME/android-sdk/build-tools/35.0.0:$PATH" >> $GITHUB_ENV
       shell: bash
 
     - name: Accept Android SDK Licenses
@@ -67,12 +66,6 @@ jobs:
 
     - name: Build the APK
       run: |
-        cd bingo_game  # Adjust if your build file is in a different folder
+        cd bingo_game  # Ensure this is the correct path to your project folder
         buildozer android debug
       shell: bash
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v3  # Updated to latest version
-      with:
-        name: BingoApp-debug.apk
-        path: bin/*.apk  # Adjust path as necessary for your output APK
