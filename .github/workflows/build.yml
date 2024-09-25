@@ -39,9 +39,9 @@ jobs:
         echo "PATH=$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
       shell: bash
 
-    - name: Accept Android SDK Licenses
+    - name: Force Accept Android SDK Licenses
       run: |
-        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
+        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses || true
       shell: bash
 
     - name: Install Android SDK components
