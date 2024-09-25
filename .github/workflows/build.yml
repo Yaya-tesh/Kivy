@@ -17,21 +17,35 @@ jobs:
         with:
           java-version: '11'
 
-      - name: Install Android SDK
+      # Install Android SDK Command-line Tools
+      - name: Download Android SDK Command-line Tools
         run: |
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/tools
+          rm commandlinetools-linux-9477386_latest.zip
 
+      # Set up Android SDK environment
+      - name: Set up environment variables
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
+        shell: bash
+
+      # Accept Android SDK Licenses
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses
 
+      # Install Android SDK and Build Tools
+      - name: Install Android SDK and Build Tools
+        run: |
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      # Clear SDK Cache (optional, for troubleshooting)
       - name: Clear SDK Cache
         run: rm -rf $HOME/android-sdk/.cache
 
-      - name: Uninstall Build Tools
-        run: sdkmanager --uninstall "build-tools;35.0.0"
-
-      - name: Install Stable Build Tools
-        run: sdkmanager "build-tools;34.0.0"
-
+      # Build APK with Buildozer
       - name: Build APK
-        run: buildozer -v -p android debug  # Ensure this step is correctly configured
+        run: buildozer -v -p android debug
