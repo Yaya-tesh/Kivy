@@ -17,7 +17,19 @@ jobs:
         with:
           java-version: '11'
 
-      # Install Android SDK Command-line Tools
+      # Install Python and Pip
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      # Install Buildozer and dependencies
+      - name: Install Buildozer
+        run: |
+          pip install --upgrade pip
+          pip install buildozer
+
+      # Download Android SDK Command-line Tools
       - name: Download Android SDK Command-line Tools
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
@@ -41,10 +53,6 @@ jobs:
       - name: Install Android SDK and Build Tools
         run: |
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-
-      # Clear SDK Cache (optional, for troubleshooting)
-      - name: Clear SDK Cache
-        run: rm -rf $HOME/android-sdk/.cache
 
       # Build APK with Buildozer
       - name: Build APK
