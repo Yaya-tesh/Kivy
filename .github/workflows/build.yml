@@ -1,37 +1,30 @@
-name: Build Kivy App
+name: Build Kivy Android App
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v4
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
         python-version: '3.10'
 
     - name: Install dependencies
       run: |
-        sudo apt update
-        sudo apt install -y build-essential ccache libffi-dev python3-pip python3-setuptools \
-            git zip unzip zlib1g-dev python3-dev libncurses5 libtinfo5 libjpeg-dev \
-            libsqlite3-dev libssl-dev libgstreamer-plugins-base1.0-0 \
-            libavcodec-dev libavformat-dev libswscale-dev
-        pip install --upgrade Cython==0.29.36 virtualenv
-
-    - name: Install Buildozer
-      run: |
-        pip install buildozer
-        sudo apt install -y openjdk-11-jdk
-
+        python -m pip install --upgrade pip
+        pip install buildozer cython
+    
     - name: Install Android SDK Command-line Tools
       run: |
         mkdir -p $HOME/android-sdk/cmdline-tools
@@ -48,17 +41,14 @@ jobs:
     - name: Accept Android SDK Licenses
       run: |
         yes | sdkmanager --licenses
+      shell: bash
 
-    - name: Install Android SDK and Build Tools
+    - name: Install Android SDK components
       run: |
-        sdkmanager "platform-tools" "platforms;android-31" "build-tools;35.0.0"
+        sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+      shell: bash
 
-    - name: Build APK
+    - name: Build the APK
       run: |
-        buildozer -v android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: kivy-app-apk
-        path: bin/*.apk
+        buildozer android debug
+      shell: bash
