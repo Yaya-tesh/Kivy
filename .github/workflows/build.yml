@@ -41,7 +41,7 @@ jobs:
 
     - name: Accept Android SDK Licenses
       run: |
-        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses || true
+        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
       shell: bash
 
     - name: Install Android SDK components
