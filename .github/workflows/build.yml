@@ -65,14 +65,4 @@ jobs:
         fi
       shell: bash
 
-    - name: Build the APK
-      run: |
-        cd bingo_game  # Adjust if your build file is in a different folder
-        buildozer android debug
-      shell: bash
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v2
-      with:
-        name: BingoApp-debug.apk
-        path: bin/*.apk  # Adjust path as necessary for your output APK
+    -
