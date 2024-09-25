@@ -1,54 +1,78 @@
-name: Build Android APK
+name: Build Kivy Android App
 
 on:
   push:
     branches:
-      - main  # Adjust to your default branch if needed
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.8'  # Use the Python version you need
+        python-version: '3.10'
 
-    - name: Install Buildozer and dependencies
+    - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-pip python3-setuptools python3-wheel
-        pip install --upgrade pip
-        pip install buildozer
+        python -m pip install --upgrade pip
+        pip install buildozer cython
 
-    - name: Install additional packages for Buildozer
+    - name: Install Android SDK Command-line Tools
       run: |
-        sudo apt-get install -y git openjdk-11-jdk
-        sudo apt-get install -y python3-dev zip unzip zlib1g-dev
-        sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev libfontconfig1
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/tools
 
-    - name: Install Android SDK and AIDL
+    - name: Set up Android SDK environment
       run: |
-        wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
-        unzip sdk-tools-linux-4333796.zip -d $HOME/android-sdk
-        yes | $HOME/android-sdk/tools/bin/sdkmanager --licenses
-        $HOME/android-sdk/tools/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "extras;android;m2repository"
-        echo "export ANDROID_HOME=$HOME/android-sdk" >> $HOME/.bashrc
-        echo "export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools" >> $HOME/.bashrc
-        source $HOME/.bashrc
+        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "PATH=$HOME/android-sdk/cmdline-tools/tools/bin:$HOME/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
+        echo "PATH=$HOME/android-sdk/build-tools/35.0.0:$PATH" >> $GITHUB_ENV
+      shell: bash
 
-    - name: Build APK
+    - name: Accept Android SDK Licenses
       run: |
-        cd bingo_game  # Adjust this path if your project is located elsewhere
-        buildozer android clean
+        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses || true
+      shell: bash
+
+    - name: Install Android SDK components
+      run: |
+        $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;35.0.0"
+      shell: bash
+
+    - name: Ensure AIDL is Installed
+      run: |
+        echo "Checking for AIDL in build-tools"
+        if [ ! -f "$HOME/android-sdk/build-tools/35.0.0/aidl" ]; then
+          echo "AIDL not found in build-tools 35.0.0, reinstalling..."
+          $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "build-tools;35.0.0"
+        fi
+        if [ ! -f "$HOME/android-sdk/build-tools/35.0.0/aidl" ]; then
+          echo "AIDL still not found, failing the build."
+          exit 1
+        else
+          echo "AIDL successfully found."
+        fi
+      shell: bash
+
+    - name: Build the APK
+      run: |
+        cd bingo_game  # Adjust if your build file is in a different folder
         buildozer android debug
+      shell: bash
 
     - name: Upload APK
       uses: actions/upload-artifact@v2
       with:
         name: BingoApp-debug.apk
-        path: bin/*.apk  # Path to the generated APK
+        path: bin/*.apk  # Adjust path as necessary for your output APK
