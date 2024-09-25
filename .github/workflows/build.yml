@@ -10,28 +10,52 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    # Step 1: Checkout the repository
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    # Step 2: Set up Python 3.x
     - name: Set up Python 3.x
       uses: actions/setup-python@v2
       with:
         python-version: 3.x
 
+    # Step 3: Install dependencies (system libraries and tools)
     - name: Install dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential ccache libffi-dev python3-pip python3-setuptools \
             git zip unzip zlib1g-dev python3-dev libncurses5 libtinfo5 libjpeg-dev \
-            libsqlite3-dev libssl-dev libgstreamer1.0 libgstreamer-plugins-base1.0-0 \
+            libsqlite3-dev libssl-dev libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 \
             libavcodec-dev libavformat-dev libswscale-dev
         sudo pip3 install --upgrade Cython==0.29.19 virtualenv
 
+    # Step 4: Install buildozer
     - name: Install buildozer
       run: pip install buildozer
 
+    # Step 5: Install Android SDK & NDK (needed for building Android apps)
     - name: Install Android SDK & NDK
       run: buildozer android sdk
 
+    # Step 6: Cache .buildozer and .gradle directories for faster builds
+    - name: Cache buildozer and gradle directories
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.buildozer
+          ~/.gradle
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('**/*.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
+
+    # Step 7: Build the APK
     - name: Build APK
       run: buildozer -v android debug
+
+    # Step 8: Upload APK as an artifact
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: app-debug.apk
+        path: ./bin/debug/app-debug.apk
