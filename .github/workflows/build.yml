@@ -49,10 +49,10 @@ jobs:
         $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
       shell: bash
 
-    - name: Ensure AIDL and build tools are installed
+    - name: Ensure correct build-tools version and AIDL are installed
       run: |
         if [ ! -d "$HOME/android-sdk/build-tools/30.0.3" ]; then
-          echo "Build tools not found, installing..."
+          echo "Installing build-tools;30.0.3"
           $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "build-tools;30.0.3"
         fi
         if [ ! -f "$HOME/android-sdk/build-tools/30.0.3/aidl" ]; then
