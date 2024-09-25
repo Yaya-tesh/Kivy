@@ -32,13 +32,9 @@ jobs:
         pip install buildozer
         sudo apt install -y openjdk-11-jdk
 
-    - name: Set up Android SDK & NDK
-      run: |
-        buildozer android setup  # Corrected command for setting up the Android SDK
-
     - name: Build APK
       run: |
-        buildozer -v android debug
+        buildozer -v android debug  # This will automatically set up the SDK and build the APK
 
     - name: Upload APK
       uses: actions/upload-artifact@v3
