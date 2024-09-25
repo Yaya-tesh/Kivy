@@ -36,17 +36,22 @@ jobs:
       run: |
         echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
         echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Refresh Environment
+      run: |
         source $GITHUB_ENV
+        echo $PATH
       shell: bash
 
     - name: Accept Android SDK Licenses
       run: |
-        yes | sdkmanager --licenses
+        yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
       shell: bash
 
     - name: Install Android SDK components
       run: |
-        sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+        $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
       shell: bash
 
     - name: Build the APK
