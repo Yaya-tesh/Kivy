@@ -1,31 +1,37 @@
-name: Build Kivy Android APK
+name: Build Kivy App
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Buildozer
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3-pip git zip unzip
-        pip3 install buildozer cython virtualenv
+        sudo apt install -y build-essential ccache libffi-dev python3-pip python3-setuptools \
+            git zip unzip zlib1g-dev python3-dev libncurses5 libtinfo5 libjpeg-dev \
+            libsqlite3-dev libssl-dev libgstreamer1.0 libgstreamer-plugins-base1.0-0 \
+            libavcodec-dev libavformat-dev libswscale-dev
+        sudo pip3 install --upgrade Cython==0.29.19 virtualenv
+
+    - name: Install buildozer
+      run: pip install buildozer
+
+    - name: Install Android SDK & NDK
+      run: buildozer android sdk
 
     - name: Build APK
-      run: |
-        cd ${{ github.workspace }}
-        buildozer android debug
-
-    - name: Upload APK to GitHub
-      uses: actions/upload-artifact@v2
-      with:
-        name: BingoApp APK
-        path: bin/*.app
+      run: buildozer -v android debug
