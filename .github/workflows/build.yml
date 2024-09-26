@@ -20,23 +20,36 @@ jobs:
 
       - name: Install Android SDK Command Line Tools
         run: |
-          wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O commandlinetools.zip
+          # Create required directories for Android SDK
           mkdir -p $HOME/android-sdk/cmdline-tools
+          
+          # Download command line tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O commandlinetools.zip
+          
+          # Unzip and move the tools to the right location
           unzip commandlinetools.zip -d $HOME/android-sdk/cmdline-tools
+          
+          # Remove the downloaded zip file for cleanup
           rm commandlinetools.zip
+          
+          # Move the files to the proper cmdline-tools directory
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/
+          rm -r $HOME/android-sdk/cmdline-tools/cmdline-tools/
+          
+          # Set up environment variables
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
-          echo "export ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "export PATH=$PATH" >> $GITHUB_ENV
+          export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "PATH=$PATH" >> $GITHUB_ENV
 
-      - name: Accept all SDK licenses
-        run: yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
+      - name: Accept SDK Licenses
+        run: yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
 
-      - name: Install Build-Tools and Platform Tools
+      - name: Install Build Tools and Platform Tools
         run: |
-          yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "build-tools;33.0.3" "platforms;android-31"
+          $HOME/android-sdk/cmdline-tools/bin/sdkmanager "build-tools;33.0.0" "platforms;android-31"
 
       - name: Build APK
         run: |
-          cd your_project_directory  # Replace with your actual project directory
+          cd your_project_directory # Replace with your actual project directory
           buildozer android debug
