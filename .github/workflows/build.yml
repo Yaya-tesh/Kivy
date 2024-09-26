@@ -23,10 +23,10 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Buildozer and Dependencies
+      - name: Install Buildozer, Cython, and Dependencies
         run: |
           pip install --upgrade pip
-          pip install buildozer
+          pip install buildozer cython
 
       - name: Download Android SDK Command-line Tools
         run: |
