@@ -18,24 +18,25 @@ jobs:
         with:
           java-version: '11'
 
-      - name: Install Android SDK
+      - name: Install Android SDK Command Line Tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-11-jdk wget unzip
-          wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O android-sdk.zip
-          unzip android-sdk.zip -d android-sdk
+          wget https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O commandlinetools.zip
           mkdir -p $HOME/android-sdk/cmdline-tools
-          mv android-sdk/cmdline-tools $HOME/android-sdk/cmdline-tools/tools
+          unzip commandlinetools.zip -d $HOME/android-sdk/cmdline-tools
+          rm commandlinetools.zip
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
-          export PATH=$ANDROID_HOME/platform-tools:$PATH
+          echo "export ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "export PATH=$PATH" >> $GITHUB_ENV
 
       - name: Accept all SDK licenses
-        run: yes | sdkmanager --licenses
+        run: yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager --licenses
 
-      - name: Install Build-Tools 33.0.3 and platform tools
-        run: sdkmanager "build-tools;33.0.3" "platforms;android-31"
+      - name: Install Build-Tools and Platform Tools
+        run: |
+          yes | $HOME/android-sdk/cmdline-tools/tools/bin/sdkmanager "build-tools;33.0.3" "platforms;android-31"
 
       - name: Build APK
         run: |
+          cd your_project_directory  # Replace with your actual project directory
           buildozer android debug
