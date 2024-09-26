@@ -21,33 +21,29 @@ jobs:
       - name: Install Android SDK Command Line Tools
         run: |
           # Create required directories for Android SDK
-          mkdir -p $HOME/android-sdk/cmdline-tools
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
           
           # Download command line tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O commandlinetools.zip
           
-          # Unzip and move the tools to the right location
-          unzip commandlinetools.zip -d $HOME/android-sdk/cmdline-tools
+          # Unzip the tools to the proper directory
+          unzip commandlinetools.zip -d $HOME/android-sdk/cmdline-tools/latest
           
-          # Remove the downloaded zip file for cleanup
+          # Remove the downloaded zip file
           rm commandlinetools.zip
           
-          # Move the files to the proper cmdline-tools directory
-          mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/
-          rm -r $HOME/android-sdk/cmdline-tools/cmdline-tools/
-          
           # Set up environment variables
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "PATH=$PATH" >> $GITHUB_ENV
+          export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
 
       - name: Accept SDK Licenses
-        run: yes | $HOME/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+        run: yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
 
       - name: Install Build Tools and Platform Tools
         run: |
-          $HOME/android-sdk/cmdline-tools/bin/sdkmanager "build-tools;33.0.0" "platforms;android-31"
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "build-tools;33.0.0" "platforms;android-31"
 
       - name: Build APK
         run: |
