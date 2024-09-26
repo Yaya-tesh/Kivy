@@ -27,11 +27,11 @@ jobs:
         with:
           python-version: '3.9'
 
-      # Step 4: Install Buildozer and dependencies
+      # Step 4: Install Buildozer, python-for-android, and dependencies
       - name: Install Buildozer and dependencies
         run: |
           pip install --upgrade pip
-          pip install buildozer cython
+          pip install buildozer cython python-for-android
 
       # Step 5: Set up Android SDK
       - name: Install Android SDK Command-line Tools
@@ -52,15 +52,21 @@ jobs:
       - name: Accept Android SDK Licenses
         run: yes | sdkmanager --licenses
 
-      # Step 8: Install Android SDK Build Tools and Platform
+      # Step 8: Install Android SDK components
       - name: Install Android SDK components
         run: |
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "sources;android-34"
 
-      # Step 9: Clean Previous Builds (optional)
+      # Step 9: Create required directories
+      - name: Create required directories
+        run: |
+          mkdir -p $HOME/android-sdk/.buildozer/android/platform/python-for-android
+          mkdir -p $HOME/android-sdk/.buildozer/android/app
+
+      # Step 10: Clean Previous Builds
       - name: Clean previous builds
         run: buildozer android clean
 
-      # Step 10: Build the APK with Buildozer
+      # Step 11: Build the APK with Buildozer
       - name: Build APK
         run: buildozer android debug
