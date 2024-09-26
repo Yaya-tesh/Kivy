@@ -46,10 +46,10 @@ jobs:
         export ANDROIDSDK=$ANDROID_HOME
         export ANDROIDNDK=$ANDROID_HOME/ndk/21.3.6528147
 
-    # Clean previous builds (if needed)
-    - name: Clean previous builds
-      run: |
-        buildozer android clean
+    # Skip the clean step by commenting it out
+    # - name: Clean previous builds
+    #   run: |
+    #     buildozer android clean
 
     # Build APK
     - name: Build APK
