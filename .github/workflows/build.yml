@@ -10,42 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: '11'
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+    
+    - name: Install Android SDK
+      run: |
+        mkdir -p $ANDROID_HOME/cmdline-tools/
+        curl -sL https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip > cmdline-tools.zip
+        unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+    
+    - name: Set proper permissions for Android SDK
+      run: chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/*
 
-      - name: Install Android SDK Command Line Tools
-        run: |
-          # Create required directories for Android SDK
-          mkdir -p $HOME/android-sdk/cmdline-tools/latest
-          
-          # Download command line tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O commandlinetools.zip
-          
-          # Unzip the tools to the proper directory
-          unzip commandlinetools.zip -d $HOME/android-sdk/cmdline-tools/latest
-          
-          # Remove the downloaded zip file
-          rm commandlinetools.zip
-          
-          # Set up environment variables
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
-
-      - name: Accept SDK Licenses
-        run: yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
-
-      - name: Install Build Tools and Platform Tools
-        run: |
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "build-tools;33.0.0" "platforms;android-31"
-
-      - name: Build APK
-        run: |
-          cd your_project_directory # Replace with your actual project directory
-          buildozer android debug
+    - name: Build with Buildozer
+      run: |
+        pip install --user buildozer
+        buildozer android debug
