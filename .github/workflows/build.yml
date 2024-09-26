@@ -3,24 +3,21 @@ name: Build Kivy APK
 on:
   push:
     branches:
-      - main  # Trigger the build only when pushing to the main branch
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the latest version of the code from the repository
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Step 2: Set up Python for Buildozer and Python-for-Android
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9  # Specify Python version
+        python-version: 3.9
 
-    # Step 3: Install all necessary dependencies for Buildozer and Python-for-Android
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -29,14 +26,31 @@ jobs:
                                 libtool pkg-config zlib1g-dev \
                                 python3-pip git wget openjdk-11-jdk
         pip install --upgrade pip
-        pip install buildozer python-for-android
+        pip install cython==0.29.28  # Ensure the correct version of Cython is used
+        pip install buildozer
+        pip install python-for-android  # Ensure python-for-android is installed
 
-    # Step 4: Clean any previous builds (useful if there's an issue with caching or previous builds)
+    # Step: Create Android SDK/NDK and configure environment variables
+    - name: Install Android SDK and NDK
+      run: |
+        sudo apt-get install -y unzip
+        wget https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip
+        mkdir -p $HOME/android-sdk
+        unzip commandlinetools-linux-7302050_latest.zip -d $HOME/android-sdk/cmdline-tools
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
+        export PATH=$ANDROID_HOME/platform-tools:$PATH
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0" "ndk;21.3.6528147"
+        export ANDROIDSDK=$ANDROID_HOME
+        export ANDROIDNDK=$ANDROID_HOME/ndk/21.3.6528147
+
+    # Clean previous builds (if needed)
     - name: Clean previous builds
       run: |
         buildozer android clean
 
-    # Step 5: Build the APK file using Buildozer (debug mode)
+    # Build APK
     - name: Build APK
       run: |
         buildozer android debug
