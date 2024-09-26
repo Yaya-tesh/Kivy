@@ -49,3 +49,4 @@ presplash_color = #FFFFFF
 
 # (bool) Whether to include the debug version
 debug = True
+android.sdk = 33
