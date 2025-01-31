@@ -1,39 +1,34 @@
-name: Build APK
+name: Deploy to Railway
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # Trigger deployment when code is pushed to the main branch
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Check out the code from the repository
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Step 2: Set up Docker Buildx (optional, for building with Docker)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      # Step 3: Install Buildozer dependencies in a pre-configured Docker container
-      # We use the Kivy Docker image that has Buildozer pre-installed
-      - name: Build APK with Buildozer (Docker)
-        run: |
-          docker run --rm \
-          -v ${{ github.workspace }}:/home/user/hostcwd \
-          -w /home/user/hostcwd \
-          kivy/buildozer \
-          buildozer android debug
-
-      # Step 4: Upload the generated APK as an artifact for downloading
-      - name: Upload APK
-        uses: actions/upload-artifact@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          name: APK
-          path: bin/*.apk
+          python-version: "3.9"  # Use Python 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Log in to Railway
+        run: railway login --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}  # Add your Railway token as a GitHub secret
+
+      - name: Deploy to Railway
+        run: railway up --detach
