@@ -36,7 +36,6 @@ dashboard_template = """
     <li><a href="/delete_user_form">Delete a User</a></li>
 </ul>
 """
-
 view_users_template = """
 <h2>Registered Users</h2>
 <ul>
@@ -52,7 +51,6 @@ view_users_template = """
 </ul>
 <a href="/">Back to Dashboard</a>
 """
-
 view_pending_users_template = """
 <h2>Pending User Approvals</h2>
 <ul>
@@ -68,7 +66,6 @@ view_pending_users_template = """
 </ul>
 <a href="/">Back to Dashboard</a>
 """
-
 delete_user_form_template = """
 <h2>Delete a User</h2>
 <form action="/delete_user" method="post">
